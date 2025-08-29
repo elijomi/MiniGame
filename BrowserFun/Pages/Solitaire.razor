@@ -49,9 +49,10 @@
                 {
                     var card = waste[i];
                     var ii = i; var isTop = ii == waste.Count - 1;
-                    var rel = i - start; // 0..2 for the visible window
+                    // Fan to the left so waste never intrudes into the stock pile
+                    var relRight = (waste.Count - 1) - i; // 0 for rightmost (top), then 1,2 for previous
                     <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Waste, 0, ii) ? " selected" : string.Empty)"
-                         style="left:@(rel * 16)px;">
+                         style="left:@(-(relRight * 16))px;">
                          @CardInner(card)
                      </div>
                 }
