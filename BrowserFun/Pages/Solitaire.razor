@@ -14,9 +14,17 @@
             <button class="btn btn-sm btn-secondary" @onclick="NewGame">New Game</button>
             <button class="btn btn-sm btn-secondary" @onclick="Undo" disabled="@(!CanUndo)">Undo</button>
         </div>
+        <div class="size-controls">
+            <label style="margin-right:6px;">Size:</label>
+            <select class="form-select form-select-sm" style="width:auto; display:inline-block;" @bind="sizeMode">
+                <option value="Small">Compact</option>
+                <option value="Comfortable">Comfortable</option>
+                <option value="Large">Large</option>
+            </select>
+        </div>
     </div>
 
-    <div class="board">
+    <div class="board @BoardSizeClass">
         <div class="top-row">
             <!-- Foundations leftmost (4) -->
             @for (var f = 0; f < 4; f++)
@@ -53,7 +61,7 @@
                     // Fan to the left so waste never intrudes into the stock pile
                     var relRight = (waste.Count - 1) - i; // 0 for rightmost (top), then 1,2 for previous
                     <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Waste, 0, ii) ? " selected" : string.Empty)"
-                         style="left:@(-(relRight * 16))px;">
+                         style="left:@(-(relRight * WasteFanStepPx))px;">
                          @CardInner(card)
                      </div>
                 }
@@ -111,6 +119,7 @@
 @code {
     private enum Suit { Clubs, Diamonds, Hearts, Spades }
     private enum DragSourceKind { Tableau, Waste, Foundation }
+    private enum SizeMode { Small, Comfortable, Large }
 
     private readonly record struct Card(Suit Suit, int Rank, bool FaceUp)
     {
@@ -130,8 +139,17 @@
 
     private int moves = 0;
     private int redeals = 0; // unlimited, tracked
-    private const int FaceUpTableauOffset = 34;
-    private const int FaceDownTableauOffset = 14;
+    private SizeMode sizeMode = SizeMode.Large; // current state is Large
+    private string BoardSizeClass => sizeMode switch
+    {
+        SizeMode.Small => "size-small",
+        SizeMode.Comfortable => "size-comfy",
+        SizeMode.Large => "size-large",
+        _ => "size-large"
+    };
+    private int FaceUpTableauOffset => sizeMode switch { SizeMode.Small => 28, SizeMode.Comfortable => 34, SizeMode.Large => 42, _ => 34 };
+    private int FaceDownTableauOffset => sizeMode switch { SizeMode.Small => 12, SizeMode.Comfortable => 14, SizeMode.Large => 16, _ => 14 };
+    private int WasteFanStepPx => sizeMode switch { SizeMode.Small => 14, SizeMode.Comfortable => 16, SizeMode.Large => 20, _ => 16 };
 
     private readonly record struct DragPayload(DragSourceKind Kind, int Index, int StartIndex);
     private DragPayload? selected; // click-to-move selection
