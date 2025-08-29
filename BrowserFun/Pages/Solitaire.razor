@@ -15,12 +15,26 @@
             <button class="btn btn-sm btn-secondary" @onclick="Undo" disabled="@(!CanUndo)">Undo</button>
         </div>
         <div class="size-controls">
-            <label style="margin-right:6px;">Size:</label>
-            <select class="form-select form-select-sm" style="width:auto; display:inline-block;" @bind="sizeMode">
-                <option value="Small">Compact</option>
-                <option value="Comfortable">Comfortable</option>
-                <option value="Large">Large</option>
-            </select>
+            <div class="size-toggle" role="group" aria-label="UI size selector">
+                <button type="button"
+                        class="size-btn @(sizeMode == SizeMode.Small ? "active" : null)"
+                        title="Compact UI" aria-label="Compact UI"
+                        @onclick="() => SetSize(SizeMode.Small)">
+                    <span class="card-swatch swatch-sm"></span>
+                </button>
+                <button type="button"
+                        class="size-btn @(sizeMode == SizeMode.Comfortable ? "active" : null)"
+                        title="Comfortable UI" aria-label="Comfortable UI"
+                        @onclick="() => SetSize(SizeMode.Comfortable)">
+                    <span class="card-swatch swatch-md"></span>
+                </button>
+                <button type="button"
+                        class="size-btn @(sizeMode == SizeMode.Large ? "active" : null)"
+                        title="Large UI" aria-label="Large UI"
+                        @onclick="() => SetSize(SizeMode.Large)">
+                    <span class="card-swatch swatch-lg"></span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -150,6 +164,12 @@
     private int FaceUpTableauOffset => sizeMode switch { SizeMode.Small => 28, SizeMode.Comfortable => 34, SizeMode.Large => 42, _ => 34 };
     private int FaceDownTableauOffset => sizeMode switch { SizeMode.Small => 12, SizeMode.Comfortable => 14, SizeMode.Large => 16, _ => 14 };
     private int WasteFanStepPx => sizeMode switch { SizeMode.Small => 14, SizeMode.Comfortable => 16, SizeMode.Large => 20, _ => 16 };
+
+    private void SetSize(SizeMode mode)
+    {
+        sizeMode = mode;
+        StateHasChanged();
+    }
 
     private readonly record struct DragPayload(DragSourceKind Kind, int Index, int StartIndex);
     private DragPayload? selected; // click-to-move selection
