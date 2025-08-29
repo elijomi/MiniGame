@@ -43,7 +43,8 @@
 
             <!-- Waste then Stock (rightmost) -->
             <div class="pile waste"
-                 @onclick="OnClickWaste">
+                 @onclick="OnClickWaste"
+                 @ondblclick="OnDoubleClickWaste">
                 @{ var start = Math.Max(0, waste.Count - 3); }
                 @for (var i = start; i < waste.Count; i++)
                 {
@@ -89,7 +90,8 @@
                         var isDraggable = card.FaceUp; // allow dragging runs starting at any face-up card
                         <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Tableau, tt, ii) ? " selected" : string.Empty)"
                              style="top:@($"{top}px");"
-                             @onclick="(() => OnClickTableauCard(tt, ii))" @onclick:stopPropagation="true">
+                             @onclick="(() => OnClickTableauCard(tt, ii))" @onclick:stopPropagation="true"
+                             @ondblclick="(() => OnDoubleClickTableauCard(tt, ii))" @ondblclick:stopPropagation="true">
                              @CardInner(card)
                          </div>
                     }
@@ -361,6 +363,25 @@
         }
     }
 
+    // Double-click: attempt to auto-move the top face-up card to its foundation
+    private void OnDoubleClickTableauCard(int t, int i)
+    {
+        if (t < 0 || t >= tableau.Length) return;
+        if (tableau[t].Count == 0) return;
+        var topIndex = tableau[t].Count - 1;
+        if (i != topIndex) return; // Only allow topmost card to auto-move
+        var card = tableau[t][topIndex];
+        if (!card.FaceUp) return;
+
+        var f = FindFoundationIndexFor(card);
+        if (f is int fi)
+        {
+            LogAttemptToFoundation(card, fi);
+            TryMoveSingleToFoundation(card, () => { tableau[t].RemoveAt(topIndex); AutoFlipTop(t); return true; }, fi);
+            selected = null; // clear any selection that might have been started by single-click
+        }
+    }
+
     private int FindTopFaceUpIndex(int t)
     {
         for (int i = tableau[t].Count - 1; i >= 0; i--)
@@ -368,6 +389,36 @@
             if (tableau[t][i].FaceUp) return i;
         }
         return -1;
+    }
+
+    private int? FindFoundationIndexFor(Card card)
+    {
+        // Prefer an existing pile with the same suit if possible
+        for (int f = 0; f < 4; f++)
+        {
+            if (foundations[f].Count > 0 && foundations[f][^1].Suit == card.Suit && CanPlaceOnFoundation(card, f))
+                return f;
+        }
+        // Otherwise, any pile that legally accepts (e.g., Ace to empty)
+        for (int f = 0; f < 4; f++)
+        {
+            if (CanPlaceOnFoundation(card, f)) return f;
+        }
+        return null;
+    }
+
+    // Double-click top waste card to auto-move to a foundation if legal
+    private void OnDoubleClickWaste()
+    {
+        if (waste.Count == 0) return;
+        var card = waste[^1];
+        var f = FindFoundationIndexFor(card);
+        if (f is int fi)
+        {
+            LogAttemptToFoundation(card, fi);
+            TryMoveSingleToFoundation(card, () => { waste.RemoveAt(waste.Count - 1); return true; }, fi);
+            selected = null;
+        }
     }
 
     private string CardLabel(Card c) => $"{RankToText(c.Rank)}{SuitToUtf16(c.Suit)}";
