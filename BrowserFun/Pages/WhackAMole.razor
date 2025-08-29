@@ -1,37 +1,17 @@
 @page "/whack"
 
-<PageTitle>Whack‑a‑Mole</PageTitle>
-
-<div class="mt-4">
-    <NavLink class="btn btn-primary" href="">
-        Back
-    </NavLink>
-</div>
-
-<br />
-
-<h1>Whack‑a‑Mole</h1>
-
-<div class="mb-2">
-    <strong>Score:</strong> @score
-    <span class="ms-3"><strong>Best:</strong> @bestScore</span>
-    <span class="ms-3"><strong>Time:</strong> @timeRemaining s</span>
-    @if (isGameOver)
-    {
-        <span class="ms-3 text-danger"><strong>Game Over</strong></span>
-    }
-    @if (!hasStarted)
-    {
-        <span class="ms-3 text-muted">Click Play to start</span>
-    }
-    @if (isRunning)
-    {
-        <span class="ms-3 text-success">Running</span>
-    }
-    
-</div>
+<PageTitle>Whack a Mole</PageTitle>
 
 <div class="wam-wrapper">
+    <div class="game-header">
+        <h1>Whack a Mole</h1>
+        <div class="mb-2">
+            <strong>Hits:</strong> @hits
+            <span class="ms-3"><strong>Misses:</strong> @misses</span>
+            <span class="ms-3"><strong>Time left:</strong> @timeRemaining s</span>
+        </div>
+    </div>
+
     <div class="wam-container">
         <div class="wam-grid"
              style="grid-template-columns: repeat(@Cols, @CellPx); grid-template-rows: repeat(@Rows, @CellPx);">
@@ -48,7 +28,7 @@
         {
             <div class="overlay">
                 <div class="overlay-panel">
-                    <div class="overlay-title">Whack‑a‑Mole</div>
+                    <div class="overlay-title">Whack a Mole</div>
                     <button class="btn btn-primary" @onclick="Play">Play</button>
                 </div>
             </div>
@@ -58,13 +38,12 @@
             <div class="overlay">
                 <div class="overlay-panel">
                     <div class="overlay-title text-danger">Game Over</div>
-                    <div class="mb-2">Final score: <strong>@score</strong></div>
+                    <div class="mb-2">Hits: <strong>@hits</strong> · Misses: <strong>@misses</strong></div>
                     <button class="btn btn-primary" @onclick="Play">Play</button>
                 </div>
             </div>
         }
     </div>
-    
 </div>
 
 @code {
@@ -73,8 +52,8 @@
     private const string CellPx = "96px"; // hole size
 
     private int? activeMoleIndex;
-    private int score = 0;
-    private int bestScore = 0;
+    private int hits = 0;
+    private int misses = 0;
     private int timeRemaining = 30; // seconds per game
     private bool isRunning = false;
     private bool isGameOver = false;
@@ -90,7 +69,8 @@
         isRunning = false;
         isGameOver = false;
         activeMoleIndex = null;
-        score = 0;
+        hits = 0;
+        misses = 0;
         timeRemaining = 30;
     }
 
@@ -145,9 +125,10 @@
                 var visibleMs = rng.Next(650, 1000);
                 await Task.Delay(visibleMs, token);
 
-                // Hide mole if still active
+                // Hide mole if still active (count as a miss)
                 if (activeMoleIndex == next)
                 {
+                    misses++;
                     activeMoleIndex = null;
                     await InvokeAsync(StateHasChanged);
                 }
@@ -165,8 +146,7 @@
         if (!isRunning || isGameOver) return;
         if (activeMoleIndex == idx)
         {
-            score++;
-            if (score > bestScore) bestScore = score;
+            hits++;
             activeMoleIndex = null;
             InvokeAsync(StateHasChanged);
         }
