@@ -15,7 +15,7 @@
 
 .tableau-row { display: grid; grid-template-columns: repeat(7, var(--pile-w, 80px)); gap: 16px; align-items: start; }
 
-.pile { position: relative; width: var(--pile-w, 80px); min-height: 120px; }
+.pile { position: relative; width: var(--pile-w, 80px); min-height: var(--card-h, 112px); }
 .pile .slot { width: var(--pile-w, 80px); height: var(--card-h, 112px); border-radius: 10px; border: 1px dashed rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
 .pile .slot.empty-stock { border-style: solid; border-color: rgba(255,255,255,0.18); }
 

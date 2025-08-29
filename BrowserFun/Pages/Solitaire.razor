@@ -81,12 +81,15 @@
                 var tt = t; // capture per-iteration index
                 <div class="pile tableau"
                      @onclick="(() => OnClickTableau(tt))">
+                    @{ var runningTop = 0; }
                     @for (var i = 0; i < tableau[tt].Count; i++)
                     {
                         var ii = i; // capture per-iteration index
                         var card = tableau[tt][ii];
-                        var offset = card.FaceUp ? FaceUpTableauOffset : FaceDownTableauOffset;
-                        var top = ii * offset;
+                        // Place current card, then advance by the previous card's spacing rule
+                        var top = runningTop;
+                        var step = card.FaceUp ? FaceUpTableauOffset : FaceDownTableauOffset;
+                        runningTop += step;
                         var isDraggable = card.FaceUp; // allow dragging runs starting at any face-up card
                         <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Tableau, tt, ii) ? " selected" : string.Empty)"
                              style="top:@($"{top}px");"
