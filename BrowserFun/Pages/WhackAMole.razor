@@ -1,0 +1,188 @@
+@page "/whack"
+
+<PageTitle>Whack‑a‑Mole</PageTitle>
+
+<div class="mt-4">
+    <NavLink class="btn btn-primary" href="">
+        Back
+    </NavLink>
+</div>
+
+<br />
+
+<h1>Whack‑a‑Mole</h1>
+
+<div class="mb-2">
+    <strong>Score:</strong> @score
+    <span class="ms-3"><strong>Best:</strong> @bestScore</span>
+    <span class="ms-3"><strong>Time:</strong> @timeRemaining s</span>
+    @if (isGameOver)
+    {
+        <span class="ms-3 text-danger"><strong>Game Over</strong></span>
+    }
+    @if (!hasStarted)
+    {
+        <span class="ms-3 text-muted">Click Play to start</span>
+    }
+    @if (isRunning)
+    {
+        <span class="ms-3 text-success">Running</span>
+    }
+    
+</div>
+
+<div class="wam-wrapper">
+    <div class="wam-container">
+        <div class="wam-grid"
+             style="grid-template-columns: repeat(@Cols, @CellPx); grid-template-rows: repeat(@Rows, @CellPx);">
+            @for (var idx = 0; idx < Rows * Cols; idx++)
+            {
+                var holeIndex = idx; // capture per-iteration value for event handler
+                var isMole = activeMoleIndex == holeIndex;
+                var css = isMole ? "hole mole" : "hole";
+                <button class="@css" @onclick="(() => Whack(holeIndex))" aria-label="Hole @holeIndex"></button>
+            }
+        </div>
+
+        @if (!hasStarted)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title">Whack‑a‑Mole</div>
+                    <button class="btn btn-primary" @onclick="Play">Play</button>
+                </div>
+            </div>
+        }
+        @if (isGameOver)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title text-danger">Game Over</div>
+                    <div class="mb-2">Final score: <strong>@score</strong></div>
+                    <button class="btn btn-primary" @onclick="Play">Play</button>
+                </div>
+            </div>
+        }
+    </div>
+    
+</div>
+
+@code {
+    private const int Rows = 3;
+    private const int Cols = 3;
+    private const string CellPx = "96px"; // hole size
+
+    private int? activeMoleIndex;
+    private int score = 0;
+    private int bestScore = 0;
+    private int timeRemaining = 30; // seconds per game
+    private bool isRunning = false;
+    private bool isGameOver = false;
+    private bool hasStarted = false;
+    private readonly Random rng = new();
+    private CancellationTokenSource? cts;
+
+    private void Reset()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+        cts = null;
+        isRunning = false;
+        isGameOver = false;
+        activeMoleIndex = null;
+        score = 0;
+        timeRemaining = 30;
+    }
+
+    private async Task Play()
+    {
+        hasStarted = true;
+        Reset();
+        isRunning = true;
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        // Start both loops
+        _ = SpawnLoop(token);
+        _ = CountdownLoop(token);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CountdownLoop(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested && timeRemaining > 0)
+            {
+                await Task.Delay(1000, token);
+                timeRemaining--;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (TaskCanceledException) { }
+
+        if (timeRemaining <= 0 && !token.IsCancellationRequested)
+        {
+            GameOver();
+        }
+    }
+
+    private async Task SpawnLoop(CancellationToken token)
+    {
+        int? lastIdx = null;
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                // choose a random hole different from last
+                int next;
+                do { next = rng.Next(Rows * Cols); } while (lastIdx is int li && next == li);
+                lastIdx = next;
+                activeMoleIndex = next;
+                await InvokeAsync(StateHasChanged);
+
+                // Mole visible duration
+                var visibleMs = rng.Next(650, 1000);
+                await Task.Delay(visibleMs, token);
+
+                // Hide mole if still active
+                if (activeMoleIndex == next)
+                {
+                    activeMoleIndex = null;
+                    await InvokeAsync(StateHasChanged);
+                }
+
+                // Small gap before next mole
+                var gapMs = rng.Next(200, 450);
+                await Task.Delay(gapMs, token);
+            }
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private void Whack(int idx)
+    {
+        if (!isRunning || isGameOver) return;
+        if (activeMoleIndex == idx)
+        {
+            score++;
+            if (score > bestScore) bestScore = score;
+            activeMoleIndex = null;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void GameOver()
+    {
+        isRunning = false;
+        isGameOver = true;
+        cts?.Cancel();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+    }
+}
