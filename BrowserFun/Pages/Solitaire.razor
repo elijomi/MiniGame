@@ -84,7 +84,8 @@
                         var top = ii * offset;
                         var isDraggable = card.FaceUp; // allow dragging runs starting at any face-up card
                         <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Tableau, tt, ii) ? " selected" : string.Empty)"
-                             style="top:@($"{top}px");">
+                             style="top:@($"{top}px");"
+                             @onclick="(() => OnClickTableauCard(tt, ii))" @onclick:stopPropagation="true">
                              @CardInner(card)
                          </div>
                     }
@@ -326,6 +327,34 @@
             // Select the topmost face-up card in the pile (start of run)
             var i = FindTopFaceUpIndex(t);
             if (i >= 0) selected = new DragPayload(DragSourceKind.Tableau, t, i);
+        }
+    }
+
+    // Handle clicks on individual tableau cards to allow selecting any face-up card
+    private void OnClickTableauCard(int t, int i)
+    {
+        // If there's an active selection from another pile, treat this as a drop onto pile t
+        if (selected is DragPayload s)
+        {
+            // If selection is not from this same tableau pile, attempt the move to this pile
+            if (s.Kind != DragSourceKind.Tableau || s.Index != t)
+            {
+                OnClickTableau(t);
+                return;
+            }
+
+            // Selection is from this same pile: update the run start to the clicked face-up card
+            if (i >= 0 && i < tableau[t].Count && tableau[t][i].FaceUp)
+            {
+                selected = new DragPayload(DragSourceKind.Tableau, t, i);
+            }
+            return;
+        }
+
+        // No selection yet: select clicked card if it's face-up
+        if (i >= 0 && i < tableau[t].Count && tableau[t][i].FaceUp)
+        {
+            selected = new DragPayload(DragSourceKind.Tableau, t, i);
         }
     }
 
