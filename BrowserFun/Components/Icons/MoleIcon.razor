@@ -1,0 +1,16 @@
+@* Simple mole head icon SVG; accepts arbitrary attributes like class/width/height *@
+<svg @attributes="AdditionalAttributes" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="13" r="7.5" fill="#7b5b49" />
+    <circle cx="8.2" cy="6.5" r="2" fill="#6b4a3b" />
+    <circle cx="15.8" cy="6.5" r="2" fill="#6b4a3b" />
+    <ellipse cx="12" cy="14" rx="4.6" ry="3.2" fill="#b08974" />
+    <circle cx="12" cy="14.2" r="1.1" fill="#ef8895" />
+    <circle cx="9.5" cy="11.2" r="1.2" fill="#111" />
+    <circle cx="14.5" cy="11.2" r="1.2" fill="#111" />
+    <path d="M8 17c2.6 1 5.4 1 8 0" fill="none" stroke="#6b4a3b" stroke-width="1.2" stroke-linecap="round" />
+</svg>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object>? AdditionalAttributes { get; set; }
+}
+

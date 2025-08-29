@@ -1,13 +1,17 @@
 ﻿@page "/"
+@using BrowserFun.Components.Icons
 
 <PageTitle>Mini Games</PageTitle>
 
-<div class="mt-4">
-    <NavLink class="btn btn-primary" href="snake">
+<div class="mt-4 game-links">
+    <NavLink class="btn btn-primary game-link" href="snake">
+        <SnakeIcon class="icon" />
         Snake
     </NavLink>
-    <NavLink class="btn btn-primary ms-2" href="whack">
+    <NavLink class="btn btn-primary game-link" href="whack">
+        <MoleIcon class="icon" />
         Whack a Mole
     </NavLink>
-    <span class="ms-2 text-muted"></span>
+    <span class="text-muted"></span>
+    
 </div>
