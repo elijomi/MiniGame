@@ -1,5 +1,6 @@
 @page "/solitaire"
 @using System.Text.Json
+@using BrowserFun.Components
 
 <PageTitle>Solitaire</PageTitle>
 
@@ -51,8 +52,11 @@
                     var ii = i; // capture per-iteration index
                     <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Foundation, ff, ii) ? " selected" : string.Empty)"
                          style="top:@(ii * 1)px; left:@(ii * 0)px;">
-                         @CardInner(card)
-                     </div>
+                        <SolitaireCard FaceUp="@card.FaceUp"
+                                       IsRed="@card.IsRed"
+                                       Rank="@card.Rank"
+                                       SuitGlyph="@SuitToUtf16(card.Suit)" />
+                    </div>
                 }
                     @if (foundations[ff].Count == 0)
                     {
@@ -76,8 +80,11 @@
                     var relRight = (waste.Count - 1) - i; // 0 for rightmost (top), then 1,2 for previous
                     <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Waste, 0, ii) ? " selected" : string.Empty)"
                          style="left:@(-(relRight * WasteFanStepPx))px;">
-                         @CardInner(card)
-                     </div>
+                        <SolitaireCard FaceUp="@card.FaceUp"
+                                       IsRed="@card.IsRed"
+                                       Rank="@card.Rank"
+                                       SuitGlyph="@SuitToUtf16(card.Suit)" />
+                    </div>
                 }
                 @if (waste.Count == 0)
                 {
@@ -117,8 +124,11 @@
                              style="top:@($"{top}px");"
                              @onclick="(() => OnClickTableauCard(tt, ii))" @onclick:stopPropagation="true"
                              @ondblclick="(() => OnDoubleClickTableauCard(tt, ii))" @ondblclick:stopPropagation="true">
-                             @CardInner(card)
-                         </div>
+                            <SolitaireCard FaceUp="@card.FaceUp"
+                                           IsRed="@card.IsRed"
+                                           Rank="@card.Rank"
+                                           SuitGlyph="@SuitToUtf16(card.Suit)" />
+                        </div>
                     }
                     @if (tableau[tt].Count == 0)
                     {
@@ -550,23 +560,6 @@
     {
         for (int i = 0; i < pile.Count; i++) yield return (pile[i], i);
     }
-
-    private RenderFragment CardInner(Card c) => builder =>
-    {
-        // Face-down card uses CSS only
-        if (!c.FaceUp) return;
-        var seq = 0;
-        builder.OpenElement(seq++, "div");
-        builder.AddAttribute(seq++, "class", "card-face");
-
-        // Rank/Suit glyphs
-        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner sol-tl {(c.IsRed ? "sol-red" : "sol-black")}");
-        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToUtf16(c.Suit)); builder.CloseElement();
-        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner sol-br {(c.IsRed ? "sol-red" : "sol-black")}");
-        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToUtf16(c.Suit)); builder.CloseElement();
-
-        builder.CloseElement();
-    };
 
     private static string RankToText(int r) => r switch
     {

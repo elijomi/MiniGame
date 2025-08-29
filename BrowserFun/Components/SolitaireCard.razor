@@ -1,0 +1,33 @@
+@namespace BrowserFun.Components
+
+@* Simple presentational card face. Renders nothing for face-down cards; the
+   containing div should provide facedown visuals via CSS. *@
+
+@if (FaceUp)
+{
+    <div class="card-face">
+        <div class="corner sol-tl @(IsRed ? "sol-red" : "sol-black")">
+            @RankText<br />@SuitGlyph
+        </div>
+        <div class="corner sol-br @(IsRed ? "sol-red" : "sol-black")">
+            @RankText<br />@SuitGlyph
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool FaceUp { get; set; }
+    [Parameter] public bool IsRed { get; set; }
+    [Parameter] public int Rank { get; set; }
+    [Parameter] public string SuitGlyph { get; set; } = "?";
+
+    private string RankText => Rank switch
+    {
+        1 => "A",
+        11 => "J",
+        12 => "Q",
+        13 => "K",
+        _ => Rank.ToString()
+    };
+}
+
