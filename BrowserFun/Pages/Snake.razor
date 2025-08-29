@@ -3,6 +3,15 @@
 
 <PageTitle>Snake</PageTitle>
 
+<div class="mt-4">
+    <NavLink class="btn btn-primary" href="">
+        Back
+    </NavLink>
+    <span class="ms-2 text-muted"></span>
+</div>
+
+<br>
+
 <h1>Snake</h1>
 
 <div class="mb-2">
@@ -65,7 +74,6 @@
     private Direction direction = Direction.Right;
     private Direction pendingDirection = Direction.Right;
     private System.Timers.Timer? loopTimer;
-    private bool isRunning = false;
     private bool isGameOver = false;
     private bool hasStarted = false;
     private int score = 0;
@@ -89,7 +97,6 @@
     private void SetupNewGame()
     {
         isGameOver = false;
-        isRunning = false;
         score = 0;
         direction = Direction.Right;
         pendingDirection = Direction.Right;
@@ -120,7 +127,6 @@
             loopTimer.AutoReset = true;
         }
 
-        isRunning = true;
         loopTimer.Start();
         await InvokeAsync(StateHasChanged);
         // Ensure the board has focus so keyboard controls work immediately after Start
@@ -135,7 +141,6 @@
 
     private void StopTimer()
     {
-        isRunning = false;
         loopTimer?.Stop();
     }
 
