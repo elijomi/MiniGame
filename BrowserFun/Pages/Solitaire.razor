@@ -84,7 +84,7 @@
                     {
                         var ii = i; // capture per-iteration index
                         var card = tableau[tt][ii];
-                        var offset = card.FaceUp ? 22 : 12;
+                        var offset = card.FaceUp ? FaceUpTableauOffset : FaceDownTableauOffset;
                         var top = ii * offset;
                         var isDraggable = card.FaceUp; // allow dragging runs starting at any face-up card
                         <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Tableau, tt, ii) ? " selected" : string.Empty)"
@@ -125,6 +125,8 @@
 
     private int moves = 0;
     private int redeals = 0; // unlimited, tracked
+    private const int FaceUpTableauOffset = 28;
+    private const int FaceDownTableauOffset = 12;
 
     private readonly record struct DragPayload(DragSourceKind Kind, int Index, int StartIndex);
     private DragPayload? selected; // click-to-move selection
