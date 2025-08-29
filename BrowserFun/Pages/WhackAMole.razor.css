@@ -36,14 +36,12 @@
     background: radial-gradient(circle at 50% 60%, #0c1425, #0a1020 65%, #0b0f19 100%);
 }
 
-.hole.mole::after {
-    /* Mole bubble */
-    content: "";
+/* SVG mole icon positioned like the previous bubble */
+.hole .mole-icon {
     position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%);
     width: 60px; height: 60px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, #7b5b49, #5e4032 70%, #4a3227 100%);
-    box-shadow: 0 6px 10px rgba(0,0,0,0.35);
+    pointer-events: none;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
     animation: pop 150ms ease-out;
 }
 

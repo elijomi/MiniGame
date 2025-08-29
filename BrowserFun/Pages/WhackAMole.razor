@@ -1,4 +1,5 @@
 @page "/whack"
+@using BrowserFun.Components.Icons
 
 <PageTitle>Whack a Mole</PageTitle>
 
@@ -31,7 +32,12 @@
                 var isMole = activeMoleIndex == holeIndex;
                 var isHit = lastHitIndex == holeIndex;
                 var css = $"hole{(isMole ? " mole" : string.Empty)}{(isHit ? " hit" : string.Empty)}";
-                <button class="@css" @onclick="(() => Whack(holeIndex))" aria-label="Hole @holeIndex"></button>
+                <button class="@css" @onclick="(() => Whack(holeIndex))" aria-label="Hole @holeIndex">
+                    @if (isMole)
+                    {
+                        <MoleIcon class="mole-icon" />
+                    }
+                </button>
             }
         </div>
 
