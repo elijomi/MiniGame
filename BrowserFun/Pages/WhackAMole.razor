@@ -5,10 +5,20 @@
 <div class="wam-wrapper">
     <div class="game-header">
         <h1>Whack a Mole</h1>
-        <div class="mb-2">
-            <strong>Hits:</strong> @hits
-            <span class="ms-3"><strong>Misses:</strong> @misses</span>
-            <span class="ms-3"><strong>Time left:</strong> @timeRemaining s</span>
+        <div class="status-row mb-2">
+            <div class="lives" aria-label="Lives">
+                @for (var i = 0; i < AllowedMisses; i++)
+                {
+                    var lost = i >= MissesLeft;
+                    <span class="heart @(lost ? "lost" : null)" aria-hidden="true">&#10084;</span>
+                }
+            </div>
+            <div class="level">
+                <div class="level-bar" aria-label="Level @Level">
+                    <div class="level-fill" style="@(LevelProgressStyle)"></div>
+                    <div class="level-label">Level @Level</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -38,7 +48,7 @@
             <div class="overlay">
                 <div class="overlay-panel">
                     <div class="overlay-title text-danger">Game Over</div>
-                    <div class="mb-2">Hits: <strong>@hits</strong> · Misses: <strong>@misses</strong></div>
+                    <div class="mb-2">Level reached: <strong>@Level</strong></div>
                     <button class="btn btn-primary" @onclick="Play">Play</button>
                 </div>
             </div>
@@ -54,7 +64,7 @@
     private int? activeMoleIndex;
     private int hits = 0;
     private int misses = 0;
-    private int timeRemaining = 30; // seconds per game
+    private const int AllowedMisses = 10;
     private bool isRunning = false;
     private bool isGameOver = false;
     private bool hasStarted = false;
@@ -71,7 +81,6 @@
         activeMoleIndex = null;
         hits = 0;
         misses = 0;
-        timeRemaining = 30;
     }
 
     private async Task Play()
@@ -82,29 +91,9 @@
         cts = new CancellationTokenSource();
         var token = cts.Token;
 
-        // Start both loops
+        // Start spawn loop only (no countdown timer)
         _ = SpawnLoop(token);
-        _ = CountdownLoop(token);
         await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task CountdownLoop(CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested && timeRemaining > 0)
-            {
-                await Task.Delay(1000, token);
-                timeRemaining--;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        catch (TaskCanceledException) { }
-
-        if (timeRemaining <= 0 && !token.IsCancellationRequested)
-        {
-            GameOver();
-        }
     }
 
     private async Task SpawnLoop(CancellationToken token)
@@ -121,8 +110,8 @@
                 activeMoleIndex = next;
                 await InvokeAsync(StateHasChanged);
 
-                // Mole visible duration
-                var visibleMs = rng.Next(650, 1000);
+                // Mole visible duration (speeds up as hits increase)
+                var visibleMs = GetVisibleDurationMs();
                 await Task.Delay(visibleMs, token);
 
                 // Hide mole if still active (count as a miss)
@@ -131,10 +120,15 @@
                     misses++;
                     activeMoleIndex = null;
                     await InvokeAsync(StateHasChanged);
+                    if (MissesLeft <= 0)
+                    {
+                        GameOver();
+                        return;
+                    }
                 }
 
                 // Small gap before next mole
-                var gapMs = rng.Next(200, 450);
+                var gapMs = GetGapDurationMs();
                 await Task.Delay(gapMs, token);
             }
         }
@@ -151,6 +145,39 @@
             InvokeAsync(StateHasChanged);
         }
     }
+
+    private int GetVisibleDurationMs()
+    {
+        // Difficulty increases every HitsPerLevel hits (0-based index)
+        var level = Math.Max(0, hits / HitsPerLevel);
+        const int baseMin = 650;
+        const int baseMax = 1000; // exclusive upper bound semantics of Random.Next
+        const int perLevelReduction = 60;
+        const int absoluteMin = 250;
+
+        var min = Math.Max(absoluteMin, baseMin - perLevelReduction * level);
+        var max = Math.Max(min + 50, baseMax - perLevelReduction * level);
+        return rng.Next(min, max);
+    }
+
+    private int GetGapDurationMs()
+    {
+        var level = Math.Max(0, hits / HitsPerLevel);
+        const int baseMin = 200;
+        const int baseMax = 450; // exclusive upper bound semantics of Random.Next
+        const int perLevelReduction = 30;
+        const int absoluteMin = 80;
+
+        var min = Math.Max(absoluteMin, baseMin - perLevelReduction * level);
+        var max = Math.Max(min + 30, baseMax - perLevelReduction * level);
+        return rng.Next(min, max);
+    }
+
+    private const int HitsPerLevel = 5;
+    private int Level => (hits / HitsPerLevel) + 1;
+    private int MissesLeft => Math.Max(0, AllowedMisses - misses);
+    private int LevelProgressPercent => Math.Min(100, (hits % HitsPerLevel) * (100 / HitsPerLevel));
+    private string LevelProgressStyle => $"width:{LevelProgressPercent}%";
 
     private void GameOver()
     {

@@ -1,4 +1,6 @@
 .board-wrapper { max-width: fit-content; }
+.board-wrapper { margin: 0 auto; }
+.game-header { text-align: center; margin-bottom: 8px; }
 .board-container { position: relative; display: inline-block; }
 
 .board {
