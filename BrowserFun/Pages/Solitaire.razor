@@ -44,11 +44,14 @@
             <!-- Waste then Stock (rightmost) -->
             <div class="pile waste"
                  @onclick="OnClickWaste">
-                @foreach (var (card, i) in EnumeratePile(waste))
+                @{ var start = Math.Max(0, waste.Count - 3); }
+                @for (var i = start; i < waste.Count; i++)
                 {
+                    var card = waste[i];
                     var ii = i; var isTop = ii == waste.Count - 1;
+                    var rel = i - start; // 0..2 for the visible window
                     <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Waste, 0, ii) ? " selected" : string.Empty)"
-                         style="left:@(Math.Min(ii, 2) * 16)px;">
+                         style="left:@(rel * 16)px;">
                          @CardInner(card)
                      </div>
                 }
@@ -220,9 +223,6 @@
         }
     }
 
-    // Drag-and-drop removed for now; using click-to-move only
-
-    // Click-to-move support
     private void OnClickWaste()
     {
         if (waste.Count == 0) return;
@@ -368,6 +368,7 @@
     }
 
     private string CardLabel(Card c) => $"{RankToText(c.Rank)}{SuitToUtf16(c.Suit)}";
+
     private void LogAttemptToTableau(Card moving, int t, bool? legalOverride = null)
     {
         var pile = tableau[t];
@@ -375,6 +376,7 @@
         var legal = legalOverride ?? CanPlaceOnTableau(moving, t);
         Console.WriteLine($"Attempt: {CardLabel(moving)} -> {target}: {(legal ? "Legal" : "Illegal")}");
     }
+
     private void LogAttemptToFoundation(Card moving, int f)
     {
         var pile = foundations[f];
