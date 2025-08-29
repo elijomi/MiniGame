@@ -1,0 +1,28 @@
+## Build outputs
+**/bin/
+**/obj/
+**/artifacts/
+**/TestResults/
+
+## IDE and tooling
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## Logs and caches
+*.log
+*.cache
+*.tmp
+~$*
+
+## OS junk
+.DS_Store
+Thumbs.db
+
+## Packages
+*.nupkg
+*.snupkg
+
