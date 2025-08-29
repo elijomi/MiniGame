@@ -1,0 +1,32 @@
+   1: <!DOCTYPE html>
+   2: <html lang="en">
+   3: 
+   4: <head>
+   5:     <meta charset="utf-8" />
+   6:     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   7:     <title>BrowserFun</title>
+   8:     <base href="/" />
+   9:     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+  10:     <link rel="stylesheet" href="css/app.css" />
+  11:     <link rel="icon" type="image/png" href="favicon.png" />
+  12:     <link href="BrowserFun.styles.css" rel="stylesheet" />
+  13: </head>
+  14: 
+  15: <body>
+  16:     <div id="app">
+  17:         <svg class="loading-progress">
+  18:             <circle r="40%" cx="50%" cy="50%" />
+  19:             <circle r="40%" cx="50%" cy="50%" />
+  20:         </svg>
+  21:         <div class="loading-progress-text"></div>
+  22:     </div>
+  23: 
+  24:     <div id="blazor-error-ui">
+  25:         An unhandled error has occurred.
+  26:         <a href="." class="reload">Reload</a>
+  27:         <span class="dismiss">🗙</span>
+  28:     </div>
+  29:     <script src="_framework/blazor.webassembly.js"></script>
+  30: </body>
+  31: 
+  32: </html>
