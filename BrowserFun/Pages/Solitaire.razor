@@ -24,14 +24,14 @@
                 var ff = f; // capture per-iteration index
                 <div class="pile foundation"
                      @onclick="(() => OnClickFoundation(ff))">
-                    @foreach (var (card, i) in EnumeratePile(foundations[ff]))
-                    {
-                        var ii = i; // capture per-iteration index
-                        <div class="card @(card.FaceUp ? "faceup" : "facedown")"
-                             style="top:@(ii * 1)px; left:@(ii * 0)px;">
-                             @CardInner(card)
-                         </div>
-                    }
+                @foreach (var (card, i) in EnumeratePile(foundations[ff]))
+                {
+                    var ii = i; // capture per-iteration index
+                    <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Foundation, ff, ii) ? " selected" : string.Empty)"
+                         style="top:@(ii * 1)px; left:@(ii * 0)px;">
+                         @CardInner(card)
+                     </div>
+                }
                     @if (foundations[ff].Count == 0)
                     {
                         <div class="slot" @onclick="(() => OnClickFoundation(ff))"></div>
@@ -47,7 +47,7 @@
                 @foreach (var (card, i) in EnumeratePile(waste))
                 {
                     var ii = i; var isTop = ii == waste.Count - 1;
-                    <div class="card @(card.FaceUp ? "faceup" : "facedown")"
+                    <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Waste, 0, ii) ? " selected" : string.Empty)"
                          style="left:@(Math.Min(ii, 2) * 16)px;">
                          @CardInner(card)
                      </div>
@@ -65,7 +65,7 @@
                 }
                 else
                 {
-                    <div class="card facedown"></div>
+                    <div class="sol-card facedown"></div>
                 }
             </div>
         </div>
@@ -83,7 +83,7 @@
                         var offset = card.FaceUp ? 22 : 12;
                         var top = ii * offset;
                         var isDraggable = card.FaceUp; // allow dragging runs starting at any face-up card
-                        <div class="card @(card.FaceUp ? "faceup" : "facedown")"
+                        <div class="sol-card @(card.FaceUp ? "faceup" : "facedown") @(IsSelected(DragSourceKind.Tableau, tt, ii) ? " selected" : string.Empty)"
                              style="top:@($"{top}px");">
                              @CardInner(card)
                          </div>
@@ -338,7 +338,7 @@
         return -1;
     }
 
-    private string CardLabel(Card c) => $"{RankToText(c.Rank)}{SuitToChar(c.Suit)}";
+    private string CardLabel(Card c) => $"{RankToText(c.Rank)}{SuitToUtf16(c.Suit)}";
     private void LogAttemptToTableau(Card moving, int t, bool? legalOverride = null)
     {
         var pile = tableau[t];
@@ -417,15 +417,10 @@
         builder.AddAttribute(seq++, "class", "card-face");
 
         // Rank/Suit glyphs
-        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner tl {(c.IsRed ? "red" : "black")}");
-        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToChar(c.Suit)); builder.CloseElement();
-        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner br {(c.IsRed ? "red" : "black")}");
-        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToChar(c.Suit)); builder.CloseElement();
-
-        // Center suit for A, 10, J, Q, K minimal; otherwise pips would be more work — keep simple symbol
-        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", "center-suit");
-        builder.AddContent(seq++, SuitToChar(c.Suit));
-        builder.CloseElement();
+        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner sol-tl {(c.IsRed ? "sol-red" : "sol-black")}");
+        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToUtf16(c.Suit)); builder.CloseElement();
+        builder.OpenElement(seq++, "div"); builder.AddAttribute(seq++, "class", $"corner sol-br {(c.IsRed ? "sol-red" : "sol-black")}");
+        builder.AddContent(seq++, RankToText(c.Rank)); builder.AddMarkupContent(seq++, "<br/>"); builder.AddContent(seq++, SuitToUtf16(c.Suit)); builder.CloseElement();
 
         builder.CloseElement();
     };
@@ -434,8 +429,28 @@
     {
         1 => "A", 11 => "J", 12 => "Q", 13 => "K", _ => r.ToString()
     };
-    private static string SuitToChar(Suit s) => s switch
+
+    private static string SuitToGlyph(Suit s) => s switch
     {
-        Suit.Clubs => "♣", Suit.Diamonds => "♦", Suit.Hearts => "♥", Suit.Spades => "♠", _ => "?"
+        Suit.Clubs => "♣",
+        Suit.Diamonds => "♦",
+        Suit.Hearts => "♥",
+        Suit.Spades => "♠",
+        _ => "?"
     };
+
+    private bool IsSelected(DragSourceKind kind, int index, int cardIndex)
+        => selected is DragPayload s && s.Kind == kind && s.Index == index && s.StartIndex == cardIndex;
+    
+    private static string SuitToUtf16(Suit s)
+    {
+        return s switch
+        {
+            Suit.Clubs => ((char)0x2663).ToString(),
+            Suit.Diamonds => ((char)0x2666).ToString(),
+            Suit.Hearts => ((char)0x2665).ToString(),
+            Suit.Spades => ((char)0x2660).ToString(),
+            _ => "?"
+        };
+    }
 }
