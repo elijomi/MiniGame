@@ -226,12 +226,21 @@
             waste.Clear();
             redeals++; moves++;
         }
+        // Clear any selection after drawing or redealing
+        selected = null;
     }
 
     private void OnClickWaste()
     {
         if (waste.Count == 0) return;
-        selected = new DragPayload(DragSourceKind.Waste, 0, waste.Count - 1);
+        var topIdx = waste.Count - 1;
+        if (selected is DragPayload s && s.Kind == DragSourceKind.Waste && s.Index == 0 && s.StartIndex == topIdx)
+        {
+            // Toggle off if clicking the already-selected waste card
+            selected = null;
+            return;
+        }
+        selected = new DragPayload(DragSourceKind.Waste, 0, topIdx);
     }
 
     private void OnClickFoundation(int f)
@@ -351,7 +360,15 @@
             // Selection is from this same pile: update the run start to the clicked face-up card
             if (i >= 0 && i < tableau[t].Count && tableau[t][i].FaceUp)
             {
-                selected = new DragPayload(DragSourceKind.Tableau, t, i);
+                // Toggle off if re-clicking the same selected card
+                if (s.StartIndex == i)
+                {
+                    selected = null;
+                }
+                else
+                {
+                    selected = new DragPayload(DragSourceKind.Tableau, t, i);
+                }
             }
             return;
         }
