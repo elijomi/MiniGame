@@ -1,6 +1,5 @@
-.board-wrapper {
-    max-width: fit-content;
-}
+.board-wrapper { max-width: fit-content; }
+.board-container { position: relative; display: inline-block; }
 
 .board {
     display: grid;
@@ -27,3 +26,24 @@
     background: #ef4444; /* red-500 */
 }
 
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    border-radius: 8px;
+}
+
+.overlay-panel {
+    background: rgba(17,17,17,0.9);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+    color: #f3f4f6; /* gray-100 */
+}
+
+.overlay-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }

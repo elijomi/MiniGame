@@ -5,37 +5,48 @@
 
 <h1>Snake</h1>
 
-<div class="mb-3">
-    <button class="btn btn-success me-2" @onclick="StartGame" disabled="@isRunning">Start</button>
-    <button class="btn btn-secondary me-2" @onclick="PauseGame" disabled="@(!isRunning)">Pause</button>
-    <button class="btn btn-danger" @onclick="ResetGame">Reset</button>
-</div>
-
 <div class="mb-2">
     <strong>Score:</strong> @score
     <span class="ms-3"><strong>Best:</strong> @bestScore</span>
-    @if (isGameOver)
-    {
-        <span class="ms-3 text-danger"><strong>Game Over</strong></span>
-    }
 </div>
 
 <div class="board-wrapper">
-    <div @ref="boardRef"
-         tabindex="0"
-         class="board"
-         @onkeydown="OnKeyDown"
-         @onkeydown:preventDefault
-         style="grid-template-columns: repeat(@Cols, @CellPx); grid-template-rows: repeat(@Rows, @CellPx);">
-        @for (var r = 0; r < Rows; r++)
-        {
-            for (var c = 0; c < Cols; c++)
+    <div class="board-container">
+        <div @ref="boardRef"
+             tabindex="0"
+             class="board"
+             @onkeydown="OnKeyDown"
+             @onkeydown:preventDefault
+             style="grid-template-columns: repeat(@Cols, @CellPx); grid-template-rows: repeat(@Rows, @CellPx);">
+            @for (var r = 0; r < Rows; r++)
             {
-                var isFood = food.R == r && food.C == c;
-                var isSnake = snake.Any(p => p.R == r && p.C == c);
-                var css = isFood ? "cell food" : isSnake ? "cell snake" : "cell";
-                <div class="@css"></div>
+                for (var c = 0; c < Cols; c++)
+                {
+                    var isFood = food.R == r && food.C == c;
+                    var isSnake = snake.Any(p => p.R == r && p.C == c);
+                    var css = isFood ? "cell food" : isSnake ? "cell snake" : "cell";
+                    <div class="@css"></div>
+                }
             }
+        </div>
+
+        @if (!hasStarted)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title">Snake</div>
+                    <button class="btn btn-primary" @onclick="Play">Play</button>
+                </div>
+            </div>
+        }
+        @if (isGameOver)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title text-danger">Game Over</div>
+                    <button class="btn btn-primary" @onclick="Play">Play</button>
+                </div>
+            </div>
         }
     </div>
 </div>
@@ -56,6 +67,7 @@
     private System.Timers.Timer? loopTimer;
     private bool isRunning = false;
     private bool isGameOver = false;
+    private bool hasStarted = false;
     private int score = 0;
     private int bestScore = 0;
     private readonly Random rng = new();
@@ -115,15 +127,10 @@
         await boardRef.FocusAsync();
     }
 
-    private void PauseGame()
+    private async Task Play()
     {
-        StopTimer();
-    }
-
-    private void ResetGame()
-    {
-        SetupNewGame();
-        InvokeAsync(StateHasChanged);
+        hasStarted = true;
+        await StartGame();
     }
 
     private void StopTimer()
