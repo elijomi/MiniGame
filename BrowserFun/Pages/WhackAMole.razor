@@ -29,7 +29,8 @@
             {
                 var holeIndex = idx; // capture per-iteration value for event handler
                 var isMole = activeMoleIndex == holeIndex;
-                var css = isMole ? "hole mole" : "hole";
+                var isHit = lastHitIndex == holeIndex;
+                var css = $"hole{(isMole ? " mole" : string.Empty)}{(isHit ? " hit" : string.Empty)}";
                 <button class="@css" @onclick="(() => Whack(holeIndex))" aria-label="Hole @holeIndex"></button>
             }
         </div>
@@ -141,9 +142,28 @@
         if (activeMoleIndex == idx)
         {
             hits++;
+            // mark the hole as hit for a brief visual effect
+            lastHitIndex = idx;
             activeMoleIndex = null;
             InvokeAsync(StateHasChanged);
+            _ = ClearHitAfterAsync(idx);
         }
+    }
+
+    private int? lastHitIndex;
+
+    private async Task ClearHitAfterAsync(int idx)
+    {
+        try
+        {
+            await Task.Delay(300);
+            if (lastHitIndex == idx)
+            {
+                lastHitIndex = null;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch { /* ignore */ }
     }
 
     private int GetVisibleDurationMs()

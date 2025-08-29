@@ -52,6 +52,22 @@
     to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
+/* Hit feedback: subtle lift + expanding ring */
+.hole.hit { transform: translateY(-2px) scale(1.03); }
+.hole.hit::before {
+    content: "";
+    position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%) scale(0.4);
+    width: 64px; height: 64px; pointer-events: none;
+    border-radius: 999px;
+    border: 2px solid #facc15; /* amber-400 */
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+    animation: hit-ring 320ms ease-out forwards;
+}
+
+@keyframes hit-ring {
+    to { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
+}
+
 .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); border-radius: 10px; backdrop-filter: blur(4px); }
 .overlay-panel { background: rgba(17,17,17,0.85); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 12px; padding: 16px 20px; text-align: center; color: #f3f4f6; }
 .overlay-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }
