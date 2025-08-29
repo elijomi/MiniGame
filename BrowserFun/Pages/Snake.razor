@@ -94,7 +94,7 @@
         StopTimer();
     }
 
-    private void StartGame()
+    private async Task StartGame()
     {
         if (isGameOver)
         {
@@ -110,7 +110,9 @@
 
         isRunning = true;
         loopTimer.Start();
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
+        // Ensure the board has focus so keyboard controls work immediately after Start
+        await boardRef.FocusAsync();
     }
 
     private void PauseGame()
