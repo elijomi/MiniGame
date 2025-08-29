@@ -1,0 +1,17 @@
+@* Stylized overlapping cards icon; accepts arbitrary attributes via AdditionalAttributes *@
+<svg @attributes="AdditionalAttributes" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <!-- Back card -->
+    <rect x="5" y="4" width="12" height="16" rx="2.4" fill="#60a5fa" />
+    <rect x="5" y="4" width="12" height="16" rx="2.4" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="0.8" />
+    <!-- Front card -->
+    <rect x="7" y="6" width="12" height="16" rx="2.4" fill="#ffffff" />
+    <rect x="7" y="6" width="12" height="16" rx="2.4" fill="none" stroke="#d1d5db" stroke-width="0.8" />
+    <!-- Simple pattern on front card -->
+    <circle cx="13" cy="12" r="2.2" fill="#10b981" />
+    <path d="M10 16c1.6 1 4.4 1 6 0" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round" />
+</svg>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object>? AdditionalAttributes { get; set; }
+}
+

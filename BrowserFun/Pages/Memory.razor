@@ -1,0 +1,173 @@
+@page "/memory"
+@using BrowserFun.Components.Icons
+
+<PageTitle>Memory</PageTitle>
+
+<div class="memory-wrapper">
+    <div class="game-header">
+        <h1>Memory</h1>
+        <div class="mb-2">
+            <strong>Moves:</strong> @moves
+        </div>
+    </div>
+
+    <div class="memory-container">
+        <div class="memory-grid"
+             style="grid-template-columns: repeat(@Cols, @CellPx); grid-template-rows: repeat(@Rows, @CellPx);">
+            @for (var idx = 0; idx < cards.Count; idx++)
+            {
+                var cardIndex = idx; // capture per-iteration value for event handler
+                var card = cards[cardIndex];
+                var css = $"card{(card.IsMatched ? " matched" : string.Empty)}{(card.IsRevealed ? " flipped" : string.Empty)}";
+                <button class="@css" @onclick="(() => OnCardClick(cardIndex))" aria-label="Card @cardIndex">
+                    <div class="card-inner">
+                        <div class="card-face card-front">
+                            <span class="face">@card.Symbol</span>
+                        </div>
+                        <div class="card-face card-back">
+                            <MysteryIcon class="mystery-icon" />
+                        </div>
+                    </div>
+                </button>
+            }
+        </div>
+
+        @if (!hasStarted)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title">Memory</div>
+                    <button class="btn btn-primary" @onclick="Start">Play</button>
+                </div>
+            </div>
+        }
+        @if (isGameOver)
+        {
+            <div class="overlay">
+                <div class="overlay-panel">
+                    <div class="overlay-title text-success">You Won!</div>
+                    <div class="mb-2">Total moves: <strong>@moves</strong></div>
+                    <button class="btn btn-primary" @onclick="Start">Play Again</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private const int Rows = 4;
+    private const int Cols = 4;
+    private const string CellPx = "78px"; // card size
+
+    private record struct Card(int Id, string Symbol)
+    {
+        public bool IsMatched { get; set; } = false;
+        public bool IsRevealed { get; set; } = false;
+    }
+
+    private List<Card> cards = new();
+    private int? firstIndex;
+    private int? secondIndex;
+    private bool lockBoard = false;
+    private bool hasStarted = false;
+    private bool isGameOver = false;
+    private int moves = 0;
+    private readonly Random rng = new();
+
+    protected override void OnInitialized()
+    {
+        SetupNewGame();
+    }
+
+    private void SetupNewGame()
+    {
+        // Choose 8 symbols (pairs for 4x4)
+        var symbols = new List<string>
+        {
+            "🍎","🍌","🍇","🍓","🍑","🍍","🥝","🍉"
+        };
+
+        // Build pairs and shuffle
+        var pool = new List<Card>();
+        int id = 0;
+        foreach (var s in symbols)
+        {
+            pool.Add(new Card(id++, s));
+            pool.Add(new Card(id++, s));
+        }
+
+        // Fisher-Yates shuffle
+        for (int i = pool.Count - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (pool[i], pool[j]) = (pool[j], pool[i]);
+        }
+
+        cards = pool;
+        firstIndex = null;
+        secondIndex = null;
+        moves = 0;
+        isGameOver = false;
+        lockBoard = false;
+    }
+
+    private async Task Start()
+    {
+        hasStarted = true;
+        SetupNewGame();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnCardClick(int idx)
+    {
+        if (lockBoard || isGameOver || !hasStarted) return;
+        if (idx == firstIndex || cards[idx].IsMatched) return;
+
+        // Reveal the card
+        cards[idx] = cards[idx] with { IsRevealed = true };
+        await InvokeAsync(StateHasChanged);
+
+        if (firstIndex is null)
+        {
+            firstIndex = idx;
+            return;
+        }
+
+        if (secondIndex is null)
+        {
+            secondIndex = idx;
+            moves++;
+            lockBoard = true;
+
+            var a = cards[firstIndex.Value];
+            var b = cards[secondIndex.Value];
+
+            // Small pause so the player sees both
+            await Task.Delay(700);
+
+            if (a.Symbol == b.Symbol)
+            {
+                cards[firstIndex.Value] = a with { IsMatched = true };
+                cards[secondIndex.Value] = b with { IsMatched = true };
+            }
+            else
+            {
+                cards[firstIndex.Value] = a with { IsRevealed = false };
+                cards[secondIndex.Value] = b with { IsRevealed = false };
+            }
+
+            // Reset selection
+            firstIndex = null;
+            secondIndex = null;
+            lockBoard = false;
+
+            // Check win
+            if (cards.All(c => c.IsMatched))
+            {
+                isGameOver = true;
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
