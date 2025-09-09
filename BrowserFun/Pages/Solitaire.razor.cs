@@ -61,6 +61,8 @@ public partial class Solitaire : ComponentBase
     {
         moves = 0;
         redeals = 0;
+        // Reset undo history so Undo is disabled at a fresh start
+        undoStack.Clear();
         stock.Clear(); waste.Clear();
         foreach (var f in foundations) f.Clear();
         foreach (var t in tableau) t.Clear();
