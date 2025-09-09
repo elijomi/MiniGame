@@ -1,6 +1,9 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; }
 main { flex: 1; padding: 24px 0; }
 
+.title-banner { display: flex; justify-content: center; padding: 24px 0 8px; }
+.title-banner .title-graphic { width: 100%; max-width: 960px; height: auto; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35)); }
+
 .app-header {
     position: sticky; top: 0; z-index: 10;
     backdrop-filter: blur(6px);
