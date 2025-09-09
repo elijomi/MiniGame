@@ -67,3 +67,8 @@
 /* Enable some visual feedback on drag targets */
 .pile.tableau.drag-over .slot,
 .pile.foundation.drag-over .slot { outline: 2px dashed #60a5fa; outline-offset: 2px; }
+
+/* Win overlay */
+.overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); border-radius: 12px; backdrop-filter: blur(4px); }
+.overlay-panel { background: rgba(17,17,17,0.85); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 12px; padding: 16px 20px; text-align: center; color: #f3f4f6; }
+.overlay-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }

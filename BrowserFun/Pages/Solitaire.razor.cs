@@ -51,6 +51,7 @@ public partial class Solitaire : ComponentBase
     private DragPayload? selected; // click-to-move selection
 
     private readonly Random rng = new();
+    private bool isGameWon = false;
 
     protected override void OnInitialized()
     {
@@ -63,6 +64,7 @@ public partial class Solitaire : ComponentBase
         redeals = 0;
         // Reset undo history so Undo is disabled at a fresh start
         undoStack.Clear();
+        isGameWon = false;
         stock.Clear(); waste.Clear();
         foreach (var f in foundations) f.Clear();
         foreach (var t in tableau) t.Clear();
@@ -123,6 +125,7 @@ public partial class Solitaire : ComponentBase
         for (int i = 0; i < 7; i++) { tableau[i].Clear(); tableau[i].AddRange(s.Tableau[i]); }
         moves = s.Moves + 1; // undo counts as a move
         redeals = s.Redeals;
+        isGameWon = false;
     }
 
     private void DrawFromStock()
@@ -383,6 +386,16 @@ public partial class Solitaire : ComponentBase
             removeFromSource();
             foundations[foundationIndex].Add(card);
             moves++;
+            CheckWin();
+        }
+    }
+
+    private void CheckWin()
+    {
+        // Win when each foundation pile has 13 cards (A..K)
+        if (foundations.All(p => p.Count == 13))
+        {
+            isGameWon = true;
         }
     }
 

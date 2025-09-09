@@ -137,6 +137,17 @@
                 </div>
             }
         </div>
+
+        @if (isGameWon)
+        {
+            <div class="overlay" role="dialog" aria-modal="true" aria-label="You won dialog">
+                <div class="overlay-panel">
+                    <div class="overlay-title text-success">You won!</div>
+                    <div class="mb-2">Moves: <strong>@moves</strong></div>
+                    <div class="mb-3">Redeals: <strong>@redeals</strong></div>
+                    <button class="btn btn-primary" @onclick="NewGame">New Game</button>
+                </div>
+            </div>
+        }
     </div>
 </div>
-
