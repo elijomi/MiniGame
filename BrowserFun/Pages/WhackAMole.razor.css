@@ -13,13 +13,13 @@
 
 .wam-grid {
     display: grid;
-    gap: 14px;
+    gap: 16px; /* 3 cols -> 2 gaps => width = 3*136 + 2*16 = 440 */
     background: transparent;
     padding: 6px 0;
 }
 
 .hole {
-    width: 96px; height: 96px;
+    width: 136px; height: 136px;
     border-radius: 50%;
     background: radial-gradient(circle at 50% 60%, #0c1425, #0a1020 65%, #0b0f19 100%);
     border: 1px solid var(--border);

@@ -5,8 +5,8 @@
 
 .memory-grid {
   display: grid;
-  gap: 10px;
-  padding: 8px;
+  gap: 12px; /* 4 cols -> 3 gaps => width = 4*101 + 3*12 = 440 */
+  padding: 6px; /* match Snake board padding so outer width matches */
   background: linear-gradient(180deg, #0b1220, #0a111d);
   border: 1px solid var(--border);
   border-radius: 12px;
