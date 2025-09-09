@@ -4,6 +4,10 @@ main { flex: 1; padding: 24px 0; }
 .title-banner { display: flex; justify-content: center; padding: 24px 0 8px; }
 .title-banner .title-graphic { width: 100%; max-width: 960px; height: auto; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35)); }
 
+/* Back button row aligned to banner width */
+.banner-actions { margin-top: 4px; margin-bottom: 4px; }
+.back-button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; }
+
 .app-header {
     position: sticky; top: 0; z-index: 10;
     backdrop-filter: blur(6px);

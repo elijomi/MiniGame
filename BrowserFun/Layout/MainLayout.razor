@@ -1,11 +1,29 @@
 @inherits LayoutComponentBase
+@inject NavigationManager Nav
 <div class="page">
     <div class="title-banner">
         <img src="images/title.svg" alt="Browser Mini Games" class="title-graphic" />
     </div>
+    @if (ShowBackButton)
+    {
+        <div class="container banner-actions">
+            <a href="/" class="btn btn-secondary back-button" aria-label="Back to home">&#8592; Back</a>
+        </div>
+    }
     <main>
         <div class="container">
             @Body
         </div>
     </main>
 </div>
+
+@code {
+    private bool ShowBackButton
+    {
+        get
+        {
+            var path = Nav.ToBaseRelativePath(Nav.Uri).TrimEnd('/');
+            return path == "snake" || path == "whack" || path == "memory" || path == "solitaire";
+        }
+    }
+}
